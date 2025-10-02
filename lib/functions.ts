@@ -24,6 +24,17 @@ export interface ReprocessAudioResult {
   transcriptId: string
 }
 
+export interface SummarizeSessionParams {
+  sessionId: string
+}
+
+export interface SummarizeSessionResult {
+  ok: boolean
+  summaryId: string
+  summary: string
+  html: string
+}
+
 /**
  * Firebase Functions Integration Overview:
  *
@@ -46,6 +57,19 @@ export interface ReprocessAudioResult {
  *      • Network issues caused incomplete processing
  *    - Takes the same chunk file and reprocesses it through AssemblyAI
  *    - Updates the existing transcript document in Firestore
+ *
+ * 3. summarizeSession (HTTPS Callable - MANUAL)
+ *    - Called manually from the client to generate an AI-powered summary of a session
+ *    - Use cases:
+ *      • Generate session recap after the session ends
+ *      • Create summary for campaign notes
+ *      • Help players remember what happened
+ *    - Combines all transcript chunks for a session
+ *    - Uses Gemini AI to create comprehensive summary including:
+ *      • Session overview, key events, character actions
+ *      • NPCs met, items/loot, locations visited
+ *      • Combat encounters, quest progress, player decisions
+ *    - Saves summary to Firestore and updates session status
  */
 
 /**
@@ -178,6 +202,49 @@ export async function reprocessAudio(params: ReprocessAudioParams): Promise<Repr
     return result
   } catch (error) {
     console.error("[v0] reprocessAudio error:", error)
+    console.error("[v0] Error type:", typeof error)
+    console.error("[v0] Error message:", error instanceof Error ? error.message : String(error))
+    throw error
+  }
+}
+
+/**
+ * Calls the summarizeSession Firebase Callable Function to generate an AI-powered summary of a D&D session.
+ *
+ * This should be used when:
+ * - A session has ended and you want to generate a recap
+ * - Creating campaign notes for future reference
+ * - Helping players remember what happened in the session
+ *
+ * @param params - Object containing sessionId
+ * @returns Promise with ok status, summaryId, and summary text
+ *
+ * @example
+ * ```typescript
+ * const result = await summarizeSession({
+ *   sessionId: "abc123"
+ * });
+ * console.log("Summary:", result.summary);
+ * ```
+ */
+export async function summarizeSession(params: SummarizeSessionParams): Promise<SummarizeSessionResult> {
+  console.log("[v0] summarizeSession called with params:", params)
+
+  try {
+    // Import Firebase Functions dynamically to avoid SSR issues
+    const { getFunctions, httpsCallable } = await import("firebase/functions")
+    const functions = getFunctions()
+    
+    // Create the callable function
+    const summarizeSessionCallable = httpsCallable(functions, 'summarizeSession')
+    
+    // Call the function
+    const result = await summarizeSessionCallable(params)
+    
+    console.log("[v0] summarizeSession result:", result.data)
+    return result.data as SummarizeSessionResult
+  } catch (error) {
+    console.error("[v0] summarizeSession error:", error)
     console.error("[v0] Error type:", typeof error)
     console.error("[v0] Error message:", error instanceof Error ? error.message : String(error))
     throw error

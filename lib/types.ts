@@ -9,6 +9,7 @@ export interface User {
   displayName: string
   email: string
   avatarUrl?: string
+  fcmToken?: string
   createdAt: Timestamp
 }
 
@@ -87,6 +88,7 @@ export interface Summary {
   id?: string
   sessionId: string
   text: string
+  html?: string
   createdAt: Timestamp
 }
 

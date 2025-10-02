@@ -29,6 +29,14 @@ export async function getUser(uid: string) {
   return userSnap.exists() ? (userSnap.data() as User) : null
 }
 
+export async function updateUserFCMToken(uid: string, fcmToken: string) {
+  const userRef = doc(db, "users", uid)
+  await updateDoc(userRef, {
+    fcmToken,
+    updatedAt: serverTimestamp(),
+  })
+}
+
 // Session operations
 export async function createSession(data: Omit<Session, "id" | "createdAt" | "updatedAt">) {
   const sessionsRef = collection(db, "sessions")

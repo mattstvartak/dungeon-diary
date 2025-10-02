@@ -22,8 +22,9 @@ import {
   deleteChunkSpeakers,
 } from "@/lib/firestore"
 import { deleteField, deleteDoc, doc } from "firebase/firestore"
-import { processAudio, reprocessAudio } from "@/lib/functions"
+import { processAudio, reprocessAudio, summarizeSession } from "@/lib/functions"
 import { requestNotificationPermission, sendNotification, setupNotificationListeners, hasNotificationPermission } from "@/lib/notifications"
+import { initializeFirebaseMessaging } from "@/lib/firebase-messaging"
 import type { Session, Transcript, Summary, Speaker, Player, Campaign, ChunkTranscript, AudioChunk, AudioChunkStatus, TranscriptSegment } from "@/lib/types"
 import { storage, db } from "@/lib/firebase"
 import { ref, getDownloadURL, deleteObject, listAll } from "firebase/storage"
@@ -102,6 +103,7 @@ function SessionDetailContent() {
   const [notificationsEnabled, setNotificationsEnabled] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [isGeneratingSummary, setIsGeneratingSummary] = useState(false)
 
   const nextChunkIndex = session?.audioChunks?.length || 0
 
@@ -134,7 +136,7 @@ function SessionDetailContent() {
     }
   }, [user, sessionId])
 
-  // Initialize notifications
+  // Initialize notifications and Firebase messaging
   useEffect(() => {
     const initializeNotifications = async () => {
       try {
@@ -154,6 +156,9 @@ function SessionDetailContent() {
             loadSessionData()
           }
         })
+
+        // Initialize Firebase messaging for FCM notifications
+        await initializeFirebaseMessaging()
       } catch (error) {
         console.error("[v0] Error initializing notifications:", error)
       }
@@ -1210,6 +1215,34 @@ function SessionDetailContent() {
     return `${mins}:${secs.toString().padStart(2, "0")}`
   }
 
+  const handleGenerateSummary = async () => {
+    if (!user?.uid || !sessionId || isGeneratingSummary) return
+
+    setIsGeneratingSummary(true)
+    try {
+      const result = await summarizeSession({ sessionId })
+      
+      if (result.ok) {
+        // Reload session data to get the updated summary
+        await loadSessionData()
+        
+        toast({
+          title: "Summary generated",
+          description: "AI summary has been created successfully",
+        })
+      }
+    } catch (error) {
+      console.error("[v0] Error generating summary:", error)
+      toast({
+        title: "Summary generation failed",
+        description: error instanceof Error ? error.message : "Failed to generate summary",
+        variant: "destructive",
+      })
+    } finally {
+      setIsGeneratingSummary(false)
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#101010]">
@@ -1862,7 +1895,7 @@ function SessionDetailContent() {
               <CardHeader>
                 <CardTitle className="text-[#EDEDEE]">Summary</CardTitle>
                 <CardDescription className="text-[#A3A3A3]">
-                  {summary ? "AI-generated session summary" : "No summary available yet"}
+                  {summary ? "AI-generated session summary" : "Generate an AI summary of your session"}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -1871,9 +1904,35 @@ function SessionDetailContent() {
                     <p className="text-[#EDEDEE] leading-relaxed whitespace-pre-wrap">{summary.text}</p>
                   </div>
                 ) : (
-                  <p className="text-center text-[#A3A3A3] py-8">
-                    Summary will be generated after transcript is complete
-                  </p>
+                  <div className="text-center py-8 space-y-4">
+                    <p className="text-[#A3A3A3]">
+                      {chunkTranscripts.length > 0 
+                        ? "Generate an AI-powered summary of your session"
+                        : "Transcripts are needed to generate a summary. Process your audio recordings first."
+                      }
+                    </p>
+                    {chunkTranscripts.length > 0 && (
+                      <Button
+                        onClick={handleGenerateSummary}
+                        disabled={isGeneratingSummary}
+                        className="bg-[#8B5CF6] hover:bg-[#8B5CF6]/90 text-white"
+                      >
+                        {isGeneratingSummary ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                            Generating Summary...
+                          </>
+                        ) : (
+                          <>
+                            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                            </svg>
+                            Generate Summary
+                          </>
+                        )}
+                      </Button>
+                    )}
+                  </div>
                 )}
               </CardContent>
             </Card>

@@ -1,4 +1,24 @@
 {
-  "indexes": [],
+  "indexes": [
+    {
+      "collectionGroup": "transcripts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "sessionId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "userId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "ASCENDING"
+        }
+      ],
+      "density": "SPARSE_ALL"
+    }
+  ],
   "fieldOverrides": []
 }
