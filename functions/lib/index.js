@@ -33,7 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.reprocessAudio = exports.processAudio = exports.onAudioUpload = void 0;
+exports.reprocessAudio = exports.processAudio = exports.onAudioUpload = exports.summarizeSession = void 0;
 const storage_1 = require("firebase-functions/v2/storage");
 const https_1 = require("firebase-functions/v2/https");
 const admin = __importStar(require("firebase-admin"));
@@ -41,6 +41,8 @@ const os = __importStar(require("os"));
 const path = __importStar(require("path"));
 const assemblyai_1 = require("./assemblyai");
 const firestore_1 = require("./firestore");
+const summarizeSession_1 = require("./summarizeSession");
+Object.defineProperty(exports, "summarizeSession", { enumerable: true, get: function () { return summarizeSession_1.summarizeSession; } });
 admin.initializeApp();
 const db = admin.firestore();
 const storage = admin.storage();
@@ -267,4 +269,5 @@ exports.reprocessAudio = (0, https_1.onRequest)({
         response.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
     }
 });
+// 4) Summarize session transcripts - see summarizeSession.ts
 //# sourceMappingURL=index.js.map

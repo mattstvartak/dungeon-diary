@@ -5,6 +5,10 @@ import * as os from "os";
 import * as path from "path";
 import { processWithAssemblyAI } from "./assemblyai";
 import { saveTranscript } from "./firestore";
+import { summarizeSession } from "./summarizeSession";
+
+// Re-export the summarizeSession function
+export { summarizeSession };
 
 admin.initializeApp();
 const db = admin.firestore();
@@ -267,3 +271,5 @@ export const reprocessAudio = onRequest({
     response.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
   }
 });
+
+// 4) Summarize session transcripts - see summarizeSession.ts
