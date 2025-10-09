@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm create:*)",
+      "Bash(pnpm install:*)",
+      "Bash(pnpm run:*)",
+      "Bash(pnpm add:*)",
+      "Bash(dir:*)",
+      "Bash(cat:*)",
+      "Bash(pnpm list:*)",
+      "Bash(timeout 10 pnpm run dev)",
+      "Bash(find:*)",
+      "Bash(pnpm remove:*)",
+      "Bash(pnpm dlx:*)",
+      "Bash(timeout 15 pnpm run dev)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

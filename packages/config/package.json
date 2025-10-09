@@ -1,0 +1,12 @@
+{
+  "name": "@dungeon-diary/config",
+  "version": "0.1.0",
+  "main": "./index.js",
+  "files": [
+    "eslint-preset.js",
+    "tsconfig.json"
+  ],
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
+}
