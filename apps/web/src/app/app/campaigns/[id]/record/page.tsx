@@ -63,9 +63,11 @@ export default function RecordSessionPage() {
         .single()
 
       if (error) throw error
-      setCampaign(data)
-      // By default, mark all players as present
-      setPresentPlayers(data.player_names || [])
+      if (data) {
+        setCampaign(data as Campaign)
+        // By default, mark all players as present
+        setPresentPlayers((data as Campaign).player_names || [])
+      }
     } catch (err) {
       console.error('Error loading campaign:', err)
     }
@@ -187,7 +189,7 @@ export default function RecordSessionPage() {
         .order('session_number', { ascending: false })
         .limit(1)
 
-      const nextSessionNumber = sessions && sessions.length > 0 ? sessions[0].session_number + 1 : 1
+      const nextSessionNumber = sessions && sessions.length > 0 ? (sessions[0] as { session_number: number }).session_number + 1 : 1
 
       // Create session record
       const { data: session, error: sessionError } = await supabase

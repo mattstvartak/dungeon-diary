@@ -4,13 +4,14 @@ import * as React from "react"
 import {
   Home,
   ScrollText,
-  Settings,
-  Plus,
   Sword,
   Scroll,
+  BookOpen,
+  Wand2,
+  Sparkles,
 } from "lucide-react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 
 import { NavMain } from "@/components/nav-main"
 import { NavCampaigns } from "@/components/nav-campaigns"
@@ -29,78 +30,131 @@ import {
 } from "@/components/ui/sidebar"
 import { useAuth } from "@/providers/auth-provider"
 
-// Sample data - you can replace with real data later
-const data = {
-  navMain: [
-    {
-      title: "Dashboard",
-      url: "/app/dashboard",
-      icon: Home,
-      isActive: true,
-    },
-    {
-      title: "Campaigns",
-      url: "/app/campaigns",
-      icon: Scroll,
-      items: [
-        {
-          title: "All Campaigns",
-          url: "/app/campaigns",
-        },
-        {
-          title: "New Campaign",
-          url: "/app/campaigns?new=true",
-        },
-      ],
-    },
-    {
-      title: "Sessions",
-      url: "/app/sessions",
-      icon: ScrollText,
-      items: [
-        {
-          title: "All Sessions",
-          url: "/app/sessions",
-        },
-        {
-          title: "Recent",
-          url: "/app/sessions?filter=recent",
-        },
-      ],
-    },
-    {
-      title: "Settings",
-      url: "/app/settings",
-      icon: Settings,
-    },
-  ],
-  campaigns: [
-    {
-      name: "Curse of Strahd",
-      url: "/app/campaigns/1",
-      icon: Sword,
-    },
-    {
-      name: "Lost Mine",
-      url: "/app/campaigns/2",
-      icon: Sword,
-    },
-    {
-      name: "Homebrew",
-      url: "/app/campaigns/3",
-      icon: Sword,
-    },
-  ],
-}
+// Navigation menu structure (isActive will be set dynamically)
+const navMenuStructure = [
+  {
+    title: "Dashboard",
+    url: "/app/dashboard",
+    icon: Home,
+  },
+  {
+    title: "Campaigns",
+    url: "/app/campaigns",
+    icon: Scroll,
+  },
+  {
+    title: "Sessions",
+    url: "/app/sessions",
+    icon: ScrollText,
+  },
+  {
+    title: "Notes & Lorebook",
+    url: "/app/notes",
+    icon: BookOpen,
+    items: [
+      {
+        title: "All Notes",
+        url: "/app/notes",
+      },
+      {
+        title: "Lorebook",
+        url: "/app/notes/lorebook",
+      },
+      {
+        title: "New Note",
+        url: "/app/notes/new",
+      },
+    ],
+  },
+  {
+    title: "World Building",
+    url: "/app/world",
+    icon: Sparkles,
+    items: [
+      {
+        title: "NPCs",
+        url: "/app/world/npcs",
+      },
+      {
+        title: "Locations",
+        url: "/app/world/locations",
+      },
+      {
+        title: "Points of Interest",
+        url: "/app/world/pois",
+      },
+      {
+        title: "Items & Loot",
+        url: "/app/world/items",
+      },
+    ],
+  },
+  {
+    title: "Tools",
+    url: "/app/tools",
+    icon: Wand2,
+    items: [
+      {
+        title: "Dice Roller",
+        url: "/app/tools/dice",
+      },
+      {
+        title: "NPC Generator",
+        url: "/app/tools/npc-generator",
+      },
+      {
+        title: "Location Generator",
+        url: "/app/tools/location-generator",
+      },
+      {
+        title: "Loot Generator",
+        url: "/app/tools/loot-generator",
+      },
+    ],
+  },
+]
+
+const campaigns = [
+  {
+    name: "Curse of Strahd",
+    url: "/app/campaigns/1",
+    icon: Sword,
+  },
+  {
+    name: "Lost Mine",
+    url: "/app/campaigns/2",
+    icon: Sword,
+  },
+  {
+    name: "Homebrew",
+    url: "/app/campaigns/3",
+    icon: Sword,
+  },
+]
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const router = useRouter()
+  const pathname = usePathname()
   const { user, signOut } = useAuth()
 
   const handleSignOut = async () => {
     await signOut()
     router.push("/")
   }
+
+  // Add isActive based on current pathname
+  const navMainWithActive = navMenuStructure.map(item => {
+    // Check if current path matches this item's URL
+    const isActive = pathname === item.url || pathname?.startsWith(item.url + '/')
+
+    // For items with sub-items, check if any sub-item matches
+    const hasActiveChild = item.items?.some(subItem => pathname === subItem.url)
+
+    return {
+      ...item,
+      isActive: isActive || hasActiveChild,
+    }
+  })
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -122,11 +176,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
-        <NavCampaigns campaigns={data.campaigns} />
+        <NavMain items={navMainWithActive} />
+        <NavCampaigns campaigns={campaigns} />
       </SidebarContent>
       <SidebarFooter>
-        <SidebarCalendar />
+        {/* <SidebarCalendar /> */}
         {user && (
           <NavUser
             user={{

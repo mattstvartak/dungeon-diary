@@ -246,7 +246,11 @@ export default function CampaignDetailPage() {
                           <h3 className="font-heading text-xl font-bold">
                             Session {session.session_number}: {session.title}
                           </h3>
-                          <Badge variant={session.status}>
+                          <Badge variant={
+                            session.status === 'completed' ? 'default' :
+                            session.status === 'failed' ? 'destructive' :
+                            'secondary'
+                          }>
                             {session.status}
                           </Badge>
                         </div>

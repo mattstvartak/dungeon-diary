@@ -12,7 +12,10 @@
       "Bash(find:*)",
       "Bash(pnpm remove:*)",
       "Bash(pnpm dlx:*)",
-      "Bash(timeout 15 pnpm run dev)"
+      "Bash(timeout 15 pnpm run dev)",
+      "Bash(brew install:*)",
+      "Bash(supabase:*)",
+      "Bash(timeout 120 pnpm run build:*)"
     ],
     "deny": [],
     "ask": []

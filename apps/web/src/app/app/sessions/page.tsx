@@ -88,12 +88,10 @@ export default function SessionsPage() {
   }
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="font-heading text-4xl font-bold">All Sessions</h1>
-          <p className="text-muted-foreground mt-2">Browse and search all your D&D sessions</p>
-        </div>
+    <div className="space-y-6">
+      <div>
+        <h1 className="font-heading text-3xl md:text-4xl font-bold">All Sessions</h1>
+        <p className="text-muted-foreground mt-2">Browse and search all your D&D sessions</p>
       </div>
 
       {/* Search Bar */}

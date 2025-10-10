@@ -66,10 +66,10 @@ export default function CampaignsPage() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-heading text-4xl font-bold">Campaigns</h1>
+          <h1 className="font-heading text-3xl md:text-4xl font-bold">Campaigns</h1>
           <p className="text-muted-foreground mt-2">Manage your adventures</p>
         </div>
         <Button onClick={() => setShowCreateDialog(true)}>
